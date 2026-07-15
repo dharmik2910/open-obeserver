@@ -1,7 +1,17 @@
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia'
+import { instrumentation } from './instrumentation'
 
-const app = new Elysia().get("/", () => "Hello Elysia").listen(3000);
+async function getProfile(id: string) {
+	await new Promise((r) => setTimeout(r, 50))
+	return { id, name: 'Test User' }
+}
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-);
+new Elysia()
+	.use(instrumentation)
+	.get('/', () => 'hello world')
+	.get('/user/:id', async function getUser({ params }) {
+		return getProfile(params.id)
+	})
+	.listen(3000)
+
+console.log('Elysia running on http://localhost:3000')

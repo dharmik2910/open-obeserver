@@ -1,0 +1,26 @@
+services:
+  openobserve:
+    image: public.ecr.aws/zinclabs/openobserve:latest
+    container_name: openobserve
+    ports:
+      - "5080:5080"
+    environment:
+      ZO_ROOT_USER_EMAIL: admin@example.com
+      ZO_ROOT_USER_PASSWORD: AdminPassword123!
+    volumes:
+      - oo_data:/data
+
+  app:
+    build: .
+    container_name: elysia-app
+    ports:
+      - "3000:3000"
+    environment:
+      OTEL_SERVICE_NAME: elysia-app
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://openobserve:5080/api/default/v1/traces
+      OTEL_EXPORTER_OTLP_TRACES_HEADERS: "Authorization=Basic YWRtaW5AZXhhbXBsZS5jb206QWRtaW5QYXNzd29yZDEyMyE="
+    depends_on:
+      - openobserve
+
+volumes:
+  oo_data:
